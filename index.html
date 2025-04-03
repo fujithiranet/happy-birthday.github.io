@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Elle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #dceefd;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+      transition: all 0.5s ease-in-out;
+      position: relative;
+      z-index: 1;
+    }
+    .question-box {
+      background: #ffffffcc;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    .choices button {
+      background-color: #a7d8ff;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choices button:hover {
+      background-color: #89cfff;
+    }
+    .correct {
+      background-color: #a8f0a1 !important;
+    }
+    .incorrect {
+      background-color: #ff9b9b !important;
+    }
+    .shake {
+      animation: shake 0.4s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0); }
+    }
+    .background-decor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+    }
+    .flower-left, .flower-right {
+      position: absolute;
+      top: 0;
+      width: 150px;
+      height: 100%;
+      background-repeat: repeat-y;
+      background-size: contain;
+      background-position: top;
+      opacity: 0.3;
+    }
+    .flower-left {
+      left: 0;
+      background-image: url('https://i.imgur.com/mBhvUj3.png');
+    }
+    .flower-right {
+      right: 0;
+      background-image: url('https://i.imgur.com/0yRAYt7.png');
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .envelope {
+      position: relative;
+      width: 90%;
+      max-width: 500px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+      padding-top: 50px;
+    }
+    .flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: #ffb6c1;
+      transform-origin: top;
+      transform: rotateX(0deg);
+      transition: transform 0.6s ease;
+      z-index: 2;
+    }
+    .envelope.open .flap {
+      transform: rotateX(-180deg);
+    }
+    .message {
+      padding: 20px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.6s;
+    }
+    .envelope.open .message {
+      opacity: 1;
+    }
+    .message img {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-decor">
+    <div class="flower-left"></div>
+    <div class="flower-right"></div>
+  </div>
+  <div class="container" id="main-container">
+    <div class="question-box" id="question-box">
+      <h2 id="question"></h2>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+  <audio id="bgm" autoplay loop>
+    <source src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/ASHAMALUEVMUSIC/Happy_Birthday/ASHAMALUEVMUSIC_-_Happy_Birthday.mp3" type="audio/mpeg">
+  </audio>
+  <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const questions = [
+  {
+    text: "วันนี้วันที่เท่าไหร่?",
+    choices: ["4", "3"],
+    correct: 0
+  },
+  {
+    text: "วันนี้วันอะไร?",
+    choices: ["วันเสาร์", "วันศุกร์"],
+    correct: 1
+  },
+  {
+    text: "วันนี้วันทีเท่าไหร่?",
+    choices: ["4 เมษายน", "4 เมสายน"],
+    correct: 0
+  },
+  {
+    text: "วันนี้วันของใคร?",
+    choices: ["วันของฟูจิ", "วันของแอล"],
+    correct: 1
+  },
+  {
+    text: "ข้อสุดท้ายละก่อนไป",
+    choices: ["สุขสันต์วันเกิด", "มีความสุขมากๆนา"],
+    correct: 1
+  }
+];
+
+      let current = 0;
+      const questionEl = document.getElementById("question");
+      const choicesEl = document.getElementById("choices");
+
+      function showQuestion() {
+        const q = questions[current];
+        questionEl.textContent = q.text;
+        choicesEl.innerHTML = "";
+        q.choices.forEach((choice, index) => {
+          const btn = document.createElement("button");
+          btn.textContent = choice;
+          btn.onclick = () => handleAnswer(index, btn);
+          choicesEl.appendChild(btn);
+        });
+      }
+
+      function handleAnswer(selectedIndex, btn) {
+        const q = questions[current];
+        const buttons = document.querySelectorAll(".choices button");
+        const box = document.querySelector(".question-box");
+
+        if (selectedIndex === q.correct) {
+          btn.classList.add("correct");
+          setTimeout(() => nextQuestion(), 1000);
+        } else {
+          btn.classList.add("incorrect");
+          buttons[q.correct].classList.add("correct");
+          box.classList.add("shake");
+          setTimeout(() => {
+            box.classList.remove("shake");
+            nextQuestion();
+          }, 1000);
+        }
+      }
+
+      function nextQuestion() {
+        current++;
+        if (current < questions.length) {
+          const box = document.querySelector('.question-box');
+          box.classList.remove("fadeIn");
+          setTimeout(() => {
+            box.classList.add("fadeIn");
+            showQuestion();
+          }, 200);
+        } else {
+          showEnvelope();
+        }
+      }
+
+      function showEnvelope() {
+        const container = document.getElementById("main-container");
+        container.innerHTML = `
+          <div class="envelope" id="envelope">
+            <div class="flap"></div>
+            <div class="message">
+              <img src="elle.jfif" alt="birthday">
+              💌 Happy Birthday Elle 💌<br><br>
+              ขอให้สุขภาพยืดยาว เป็นปีที่ดี ไม่เจ็บไข้ได้ป่วย หวังสิ่งใดขอให้ได้สิ่งนั้นสมใจอยาก<br>
+              เวลาที่ท้อแท้หรือเหนื่อยหรืออะไรก็แล้วแต่ ยังมีผมอยู่นา พึ่งได้ทุกเรื่องเลยเน้อ
+            </div>
+          </div>
+        `;
+        setTimeout(() => {
+          document.getElementById("envelope").classList.add("open");
+          confetti();
+        }, 500);
+      }
+
+      function confetti() {
+        const canvas = document.createElement("canvas");
+        canvas.style.position = "fixed";
+        canvas.style.top = 0;
+        canvas.style.left = 0;
+        canvas.style.width = "100vw";
+        canvas.style.height = "100vh";
+        canvas.style.pointerEvents = "none";
+        canvas.style.zIndex = 9999;
+        document.body.appendChild(canvas);
+        const jsConfetti = new JSConfetti({ canvas });
+        jsConfetti.addConfetti();
+      }
+
+      showQuestion();
+    });
+  </script>
+</body>
+</html>
